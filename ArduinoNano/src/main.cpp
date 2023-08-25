@@ -28,68 +28,105 @@ typedef struct  {
 
 }segment;
 //Global variables--------
-#define button    1; 
+#define button    2
+#define button2   3
 segment s1;
-int min1=2; 
-int min2=3; 
-int hour1=3; 
-int hour2=2; 
+int8_t min1; 
+int8_t min2; 
+int8_t hour1; 
+int8_t hour2; 
 int counter=0;
 //------------------------
+
+//functions---------------
 void init_segment(segment *s,int a, int b,int c,int d,int e,int f,int g,int dp);
 void write_number(int number,segment s,int c); 
 void att_clock(void); 
 void adjust_clock(void); 
+void start_clock(segment *s);
+//------------------------
 
 void setup() {
   Serial.begin(9600);
+  //Setting the pins------
+
   pinMode(A1,OUTPUT);
   pinMode(A2,OUTPUT);
   pinMode(A3,OUTPUT);
   pinMode(A4,OUTPUT);
+  pinMode(button,INPUT);
+  //----------------------
 
 
-  init_segment(&s1,7,5,9,11,12,6,8,10);
+  init_segment(&s1,7,5,9,11,12,6,8,10);// init the segment
+  start_clock(&s1);
 }
 
 void loop(){
-  if(digitalRead(button)==1){
-    adjust_clock();
-  }
+  
+  if(digitalRead(button)==1){adjust_clock(); delay(250);}// Will start the function to adjust de hour
 
+
+  //Write the first digit  
   digitalWrite(A1,1); 
   write_number(min1,s1,1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A1,0);
 
+  //Write the second digit  
   digitalWrite(A2,1); 
   write_number(min2,s1,1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A2,0);
 
+  //Write the third digit 
   digitalWrite(A3,1);
   write_number(hour1,s1,1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A3,0);
 
+  //Write the fourth digit 
   digitalWrite(A4,1); 
   write_number(hour2,s1,1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A4,0);
-  att_clock(); 
 
-  
-  
+  att_clock(); //Function to att the clock 
   counter++; //We have 5x4 delay(When counter=3000,1 minute has been passed)
   
      
 }
 
 
+
+void start_clock(segment *s){
+  min1=0;
+  min2=0; 
+  hour1=0;
+  hour2=0; 
+  digitalWrite(A1,1); 
+  digitalWrite(A2,1); 
+  digitalWrite(A3,1);
+  digitalWrite(A4,1); 
+  
+  digitalWrite(s->A,1);
+  digitalWrite(s->B,1);
+  digitalWrite(s->C,1);
+  digitalWrite(s->D,1);
+  digitalWrite(s->E,1);
+  digitalWrite(s->F,1);
+
+  digitalWrite(s->G,0);
+  delay(1000);
+
+ 
+
+
+}
 void init_segment(segment *s,int a, int b,int c,int d,int e,int f,int g,int dp){
   s->A=a; 
   s->B=b;
@@ -241,7 +278,107 @@ void att_clock(){
 
 } 
 
+
 void adjust_clock(){
+  int8_t ad_counter=0; 
+
+  while (ad_counter<5)
+  {
+    if (digitalRead(button)==1){
+      if(hour2==2 && hour1>3){
+        start_clock(&s1);
+        return;
+      }
+      
+
+      delay(250);
+      ad_counter++; 
+
+    }
+
+
+    switch (ad_counter)
+    {
+    case 1:  // Case 1: Adjust the first digit  
+      digitalWrite(A2,0); 
+      digitalWrite(A3,0);
+      digitalWrite(A4,0); 
+      digitalWrite(A1,1);
+
+      write_number(min1,s1,1);
+
+      if(digitalRead(button2)==1){
+        min1++; 
+        if(min1>9){
+          min1=0;
+        }
+        delay(250);
+      }
+
+
+      delay(10);
+    break; // End case 1 --------------------
+
+    case 2:// case 2: Adjust the second digit 
+    digitalWrite(A2,1); 
+    digitalWrite(A3,0);
+    digitalWrite(A4,0); 
+    digitalWrite(A1,0);
+    write_number(min2,s1,1);
+    if(digitalRead(button2)==1){
+      min2++; 
+      if(min2>5){
+        min2=0;
+      }
+      delay(250); }
+
+      delay(10);
+      break;// end case 2--------------------
+
+    case 3:// case 3 : adjust the third digit 
+    digitalWrite(A2,0); 
+    digitalWrite(A3,1);
+    digitalWrite(A4,0); 
+    digitalWrite(A1,0);
+    write_number(hour1,s1,1);
+    if(digitalRead(button2)==1){
+      hour1++; 
+      if(hour1>9){
+          hour1=0;
+        } 
+
+      delay(250);}
+
+      delay(10); 
+      break;// End case 3 ---------------------
+
+    case 4:// case 4: adjust the fourth digit
+      digitalWrite(A2,0); 
+      digitalWrite(A3,0);
+      digitalWrite(A4,1); 
+      digitalWrite(A1,0);
+      write_number(hour2,s1,1);
+
+      if(digitalRead(button2)==1){
+        hour2++;
+        if(hour2>2){
+          hour2=0;
+        } 
+        delay(250);} // increase the second digit of hour
+
+
+      delay(10);
+      break;// end case4; 
+    
+    default:
+      
+      break;
+    }
+
+
+    
+  }
+  
 
 
 }
