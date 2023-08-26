@@ -364,11 +364,11 @@ void adjust_clock(){
         if(hour2>2){
           hour2=0;
         } 
-        delay(250);} // increase the second digit of hour
+        delay(250);} 
 
 
       delay(10);
-      break;// end case4; 
+      break;// end case 4--------------------------------
     
     default:
       
