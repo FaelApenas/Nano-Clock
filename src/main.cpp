@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <7seg.h>
 /*
 A-D7
 B-D5
@@ -16,20 +17,14 @@ C4-A4
 
 */
 
-typedef struct  {
-  int A; 
-  int B; 
-  int C; 
-  int D; 
-  int E; 
-  int F; 
-  int G; 
-  int DP; 
 
-}segment;
+//Constants 
+#define button      2
+#define button2     3
+#define time_init   0 
+#define time_cmp    62500
+
 //Global variables--------
-#define button    2
-#define button2   3
 segment s1;
 int8_t min1; 
 int8_t min2; 
@@ -38,16 +33,36 @@ int8_t hour2;
 int counter=0;
 //------------------------
 
+//interruptions 
+ISR(TIMER1_COMPA_vect){
+  TCNT1=time_init; 
+  counter++;
+
+}
+
+
+
 //functions---------------
-void init_segment(segment *s,int a, int b,int c,int d,int e,int f,int g,int dp);
-void write_number(int number,segment s,int c); 
 void att_clock(void); 
 void adjust_clock(void); 
 void start_clock(segment *s);
 //------------------------
 
 void setup() {
+
+
   Serial.begin(9600);
+  
+  TCCR1A=0; 
+  TCCR1B |= (1<<CS12); 
+  TCCR1B &= ~(1<<CS11); 
+  TCCR1B &= ~(1<<CS10);
+  TCNT1= time_init;
+  OCR1A=time_cmp; 
+
+  
+
+  TIMSK1=(1<<OCIE1A);
   //Setting the pins------
 
   pinMode(A1,OUTPUT);
@@ -55,6 +70,10 @@ void setup() {
   pinMode(A3,OUTPUT);
   pinMode(A4,OUTPUT);
   pinMode(button,INPUT);
+  DDRD |=(0<<PORTD3); 
+  DDRD |=(0<<PORTD2); 
+
+
   //----------------------
 
 
@@ -95,10 +114,13 @@ void loop(){
   delay(5); 
   digitalWrite(A4,0);
 
-  att_clock(); //Function to att the clock 
-  counter++; //We have 5x4 delay(When counter=3000,1 minute has been passed)
+  if(counter==60){
+    min1++;
+    att_clock();
+    counter=0;
+
+  }
   
-     
 }
 
 
@@ -127,144 +149,10 @@ void start_clock(segment *s){
 
 
 }
-void init_segment(segment *s,int a, int b,int c,int d,int e,int f,int g,int dp){
-  s->A=a; 
-  s->B=b;
-  s->C=c;
-  s->D=d;
-  s->E=e;
-  s->F=f;
-  s->G=g;
-  s->DP=dp;
-  pinMode(s->A,OUTPUT);
-  pinMode(s->B,OUTPUT);
-  pinMode(s->C,OUTPUT);
-  pinMode(s->D,OUTPUT);
-  pinMode(s->E,OUTPUT);
-  pinMode(s->F,OUTPUT);
-  pinMode(s->G,OUTPUT);
-  pinMode(s->DP,OUTPUT);
 
-
-
-}
-void write_number(int number,segment s,int c){
-    digitalWrite(s.A,0); 
-    digitalWrite(s.B,0);
-    digitalWrite(s.C,0); 
-    digitalWrite(s.D,0);
-    digitalWrite(s.E,0); 
-    digitalWrite(s.F,0); 
-    digitalWrite(s.G,0); 
-    digitalWrite(s.DP,0);
- 
-    if(number==0){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.E,1);
-      digitalWrite(s.F,1);
-
-    }
-    if(number ==1){
-    digitalWrite(s.B,1); 
-    digitalWrite(s.C,1);
-
-    }
-    if(number==2){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.G,1); 
-      digitalWrite(s.E,1);
-      digitalWrite(s.D,1);
-
-    }
-    if(number==3){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.G,1); 
-      digitalWrite(s.C,1);
-      digitalWrite(s.D,1);
-
-    }
-    if(number==4){
-      digitalWrite(s.F,1); 
-      digitalWrite(s.G,1);
-      digitalWrite(s.B,1); 
-      digitalWrite(s.C,1);
-
-    }
-    if(number==5){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-    }
-    if(number==6){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-      digitalWrite(s.E,1);
-
-    }
-    if(number==7){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.C,1); 
-    
-
-    }
-    if(number==8){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-      digitalWrite(s.E,1);
-
-    }
-    if(number==9){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-
-    }
-  if(c==1){
-    digitalWrite(s.A,!digitalRead(s.A)); 
-    digitalWrite(s.B,!digitalRead(s.B));
-    digitalWrite(s.C,!digitalRead(s.C)); 
-    digitalWrite(s.D,!digitalRead(s.D));
-    digitalWrite(s.E,!digitalRead(s.E)); 
-    digitalWrite(s.F,!digitalRead(s.F)); 
-    digitalWrite(s.G,!digitalRead(s.G)); 
-    digitalWrite(s.DP,!digitalRead(s.DP));
-
-
-  }
-
-
-
-
-
-
-
-}
 
 void att_clock(){
   
-  if(counter==2900){
-    min1++; 
-    counter=0;
-
-  }
   if(min1>9){min2++;min1=0;}
 
   if(min2>5){hour1++;min2=0;}
