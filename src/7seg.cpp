@@ -5,7 +5,7 @@
 
 
 
-void init_segment(segment *s,int a, int b,int c,int d,int e,int f,int g,int dp){
+void init_segment(segment *s,int8_t a, int8_t b,int8_t c,int8_t d,int8_t e,int8_t f,int8_t g,int8_t dp){
   s->A=a; 
   s->B=b;
   s->C=c;

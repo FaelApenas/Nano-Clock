@@ -22,7 +22,7 @@ C4-A4
 #define button      2
 #define button2     3
 #define time_init   0 
-#define time_cmp    62500
+#define time_cmp    62500 // time for comparison 
 
 //Global variables--------
 segment s1;
@@ -34,9 +34,9 @@ int counter=0;
 //------------------------
 
 //interruptions 
-ISR(TIMER1_COMPA_vect){
+ISR(TIMER1_COMPA_vect){ // Ao passar um segundo, uma interrupção dispara 
   TCNT1=time_init; 
-  counter++;
+  counter++;// Incrementa o contador 
 
 }
 
@@ -52,17 +52,18 @@ void setup() {
 
 
   Serial.begin(9600);
-  
+  //Seting the registers----------------
   TCCR1A=0; 
-  TCCR1B |= (1<<CS12); 
-  TCCR1B &= ~(1<<CS11); 
-  TCCR1B &= ~(1<<CS10);
-  TCNT1= time_init;
-  OCR1A=time_cmp; 
+  TCCR1B |= (1<<CS12);  // Setiitng the prescaler in 256 
+  TCCR1B &= ~(1<<CS11); // Setiitng the prescaler in 256
+  TCCR1B &= ~(1<<CS10); // Setiitng the prescaler in 256
+  TCNT1= time_init;     //Star timer in 0 
+  OCR1A=time_cmp;       //Set the compare 
 
   
 
-  TIMSK1=(1<<OCIE1A);
+  TIMSK1=(1<<OCIE1A); 
+
   //Setting the pins------
 
   pinMode(A1,OUTPUT);
@@ -87,7 +88,7 @@ void loop(){
 
 
   //Write the first digit  
-  digitalWrite(A1,1); 
+  digitalWrite(A1,1); //PortA &=(A1>>1);
   write_number(min1,s1,1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
@@ -114,9 +115,9 @@ void loop(){
   delay(5); 
   digitalWrite(A4,0);
 
-  if(counter==60){
-    min1++;
-    att_clock();
+  if(counter==59){ // Counter increments by second, 0-59 =60 seconds 
+    min1++;//Increment one minute 
+    att_clock(); //function to 
     counter=0;
 
   }
