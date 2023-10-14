@@ -17,6 +17,7 @@ main -> Main file
 
 # Compile 
 I have used the plataformIO from VSCODE to run this application 
-but if you want to use the Arduino IDE you can just copy and paste the code 
-remember to use copy the "7seg" functions to your code. 
+but if you want to use the Arduino IDE you can just copy and paste the code.
+
+Remember to use copy the "7seg" functions to your code. 
 
