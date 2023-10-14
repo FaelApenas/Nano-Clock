@@ -10,6 +10,7 @@ The project was build using a Arduino Nano and a 4 digits 7 segments display.
 
 # Files 
 7seg -> Functions to handle the 7 segments display 
+
 main -> Main file 
 
 =================================================================================
