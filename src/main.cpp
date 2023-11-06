@@ -1,5 +1,7 @@
 #include <Arduino.h>
-#include <7seg.h>
+#include <7seg.h> 
+
+
 /*
 A-D7
 B-D5
@@ -24,19 +26,20 @@ C4-A4
 #define time_init   0 
 #define time_cmp    62500 // time for comparison 
 
+
 //Global variables--------
 segment s1;
-int8_t min1; 
-int8_t min2; 
-int8_t hour1; 
-int8_t hour2; 
+int8_t min_digit_1; 
+int8_t min_digit_2; 
+int8_t hour_digit_1; 
+int8_t hour_digit_2; 
 int counter=0;
 //------------------------
 
 //interruptions 
-ISR(TIMER1_COMPA_vect){ // Ao passar um segundo, uma interrupção dispara 
+ISR(TIMER1_COMPA_vect){ // When 1 second has passed an interruption happend 
   TCNT1=time_init; 
-  counter++;// Incrementa o contador 
+  counter++;// add the counter when one second has passed 
 
 }
 
@@ -54,9 +57,11 @@ void setup() {
   Serial.begin(9600);
   //Seting the registers----------------
   TCCR1A=0; 
+
   TCCR1B |= (1<<CS12);  // Setiitng the prescaler in 256 
   TCCR1B &= ~(1<<CS11); // Setiitng the prescaler in 256
   TCCR1B &= ~(1<<CS10); // Setiitng the prescaler in 256
+  
   TCNT1= time_init;     //Star timer in 0 
   OCR1A=time_cmp;       //Set the compare 
 
@@ -78,7 +83,7 @@ void setup() {
   //----------------------
 
 
-  init_segment(&s1,7,5,9,11,12,6,8,10);// init the segment
+  init_segment(&s1,7,5,9,11,12,6,8,10,1);// init the segment
   start_clock(&s1);
 }
 
@@ -89,34 +94,34 @@ void loop(){
 
   //Write the first digit  
   digitalWrite(A1,1); //PortA &=(A1>>1);
-  write_number(min1,s1,1); 
+  write_number(min_digit_1,s1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A1,0);
 
   //Write the second digit  
   digitalWrite(A2,1); 
-  write_number(min2,s1,1); 
+  write_number(min_digit_2,s1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A2,0);
 
   //Write the third digit 
   digitalWrite(A3,1);
-  write_number(hour1,s1,1); 
+  write_number(hour_digit_1,s1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A3,0);
 
   //Write the fourth digit 
   digitalWrite(A4,1); 
-  write_number(hour2,s1,1); 
+  write_number(hour_digit_2,s1); 
   digitalWrite(10,0);//Turn the DP as High: 
   delay(5); 
   digitalWrite(A4,0);
 
-  if(counter==59){ // Counter increments by second, 0-59 =60 seconds 
-    min1++;//Increment one minute 
+  if(counter==60){ // Counter increments by second, 0-59 =60 seconds 
+    min_digit_1++;//Increment one minute 
     att_clock(); //function to 
     counter=0;
 
@@ -127,24 +132,23 @@ void loop(){
 
 
 void start_clock(segment *s){
-  min1=0;
-  min2=0; 
-  hour1=0;
-  hour2=0; 
+  min_digit_1=0;
+  min_digit_2=0; 
+  hour_digit_1=0;
+  hour_digit_2=0; 
   digitalWrite(A1,1); 
   digitalWrite(A2,1); 
   digitalWrite(A3,1);
   digitalWrite(A4,1); 
   
-  digitalWrite(s->A,1);
-  digitalWrite(s->B,1);
-  digitalWrite(s->C,1);
-  digitalWrite(s->D,1);
-  digitalWrite(s->E,1);
-  digitalWrite(s->F,1);
+  for(int i =0; i<8; i++)
+  {
+    digitalWrite(s->pins[i],0);
+    delay(250); 
 
-  digitalWrite(s->G,0);
-  delay(1000);
+  }
+
+  delay(950);
 
  
 
@@ -154,16 +158,13 @@ void start_clock(segment *s){
 
 void att_clock(){
   
-  if(min1>9){min2++;min1=0;}
+  if(min_digit_1>9){min_digit_2++;min_digit_1=0;}
 
-  if(min2>5){hour1++;min2=0;}
+  if(min_digit_2>5){hour_digit_1++;min_digit_2=0;}
 
-  if(hour1>9){hour2++;hour1=0;}
+  if(hour_digit_1>9){hour_digit_2++;hour_digit_1=0;}
   
-  if(hour2==2 && hour1==4){hour2=0;hour1=0;min1=0;min2=0;}
-
-
-
+  if(hour_digit_2==2 && hour_digit_1==4){hour_digit_2=0;hour_digit_1=0;min_digit_1=0;min_digit_2=0;}
 
 } 
 
@@ -171,10 +172,10 @@ void att_clock(){
 void adjust_clock(){
   int8_t ad_counter=0; 
 
-  while (ad_counter<5)
+  while (ad_counter<=4)
   {
     if (digitalRead(button)==1){
-      if(hour2==2 && hour1>3){
+      if(hour_digit_2==2 && hour_digit_1>3){
         start_clock(&s1);
         return;
       }
@@ -194,12 +195,12 @@ void adjust_clock(){
       digitalWrite(A4,0); 
       digitalWrite(A1,1);
 
-      write_number(min1,s1,1);
+      write_number(min_digit_1,s1);
 
       if(digitalRead(button2)==1){
-        min1++; 
-        if(min1>9){
-          min1=0;
+        min_digit_1++;  
+        if(min_digit_1>9){
+          min_digit_1=0;
         }
         delay(250);
       }
@@ -209,15 +210,16 @@ void adjust_clock(){
     break; // End case 1 --------------------
 
     case 2:// case 2: Adjust the second digit 
+    
     digitalWrite(A2,1); 
     digitalWrite(A3,0);
     digitalWrite(A4,0); 
     digitalWrite(A1,0);
-    write_number(min2,s1,1);
+    write_number(min_digit_2,s1);
     if(digitalRead(button2)==1){
-      min2++; 
-      if(min2>5){
-        min2=0;
+      min_digit_2++; 
+      if(min_digit_2>5){
+        min_digit_2=0;
       }
       delay(250); }
 
@@ -229,11 +231,11 @@ void adjust_clock(){
     digitalWrite(A3,1);
     digitalWrite(A4,0); 
     digitalWrite(A1,0);
-    write_number(hour1,s1,1);
+    write_number(hour_digit_1,s1);
     if(digitalRead(button2)==1){
-      hour1++; 
-      if(hour1>9){
-          hour1=0;
+      hour_digit_1++; 
+      if(hour_digit_1>9){
+          hour_digit_1=0;
         } 
 
       delay(250);}
@@ -246,12 +248,12 @@ void adjust_clock(){
       digitalWrite(A3,0);
       digitalWrite(A4,1); 
       digitalWrite(A1,0);
-      write_number(hour2,s1,1);
+      write_number(hour_digit_2,s1);
 
       if(digitalRead(button2)==1){
-        hour2++;
-        if(hour2>2){
-          hour2=0;
+        hour_digit_2++;
+        if(hour_digit_2>2){
+          hour_digit_2=0;
         } 
         delay(250);} 
 
