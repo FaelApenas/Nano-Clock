@@ -5,133 +5,75 @@
 
 
 
-void init_segment(segment *s,int8_t a, int8_t b,int8_t c,int8_t d,int8_t e,int8_t f,int8_t g,int8_t dp){
-  s->A=a; 
-  s->B=b;
-  s->C=c;
-  s->D=d;
-  s->E=e;
-  s->F=f;
-  s->G=g;
-  s->DP=dp;
-  pinMode(s->A,OUTPUT);
-  pinMode(s->B,OUTPUT);
-  pinMode(s->C,OUTPUT);
-  pinMode(s->D,OUTPUT);
-  pinMode(s->E,OUTPUT);
-  pinMode(s->F,OUTPUT);
-  pinMode(s->G,OUTPUT);
-  pinMode(s->DP,OUTPUT);
+void init_segment(segment *s,int8_t a, int8_t b,int8_t c,int8_t d,int8_t e,int8_t f,int8_t g,int8_t dp,int8_t dt){
+ s->pins[7]=a; 
+ s->pins[6]=b; 
+ s->pins[5]=c; 
+ s->pins[4]=d; 
+ s->pins[3]=e; 
+ s->pins[2]=f; 
+ s->pins[1]=g; 
+ s->pins[0]=dp; 
+ s->display_type= dt;
+
+for(int i=0;i<=7;i++)
+{
+  pinMode(s->pins[i],OUTPUT); 
+}
 
 
 
 }
-void write_number(int number,segment s,int c){
-    digitalWrite(s.A,0); 
-    digitalWrite(s.B,0);
-    digitalWrite(s.C,0); 
-    digitalWrite(s.D,0);
-    digitalWrite(s.E,0); 
-    digitalWrite(s.F,0); 
-    digitalWrite(s.G,0); 
-    digitalWrite(s.DP,0);
- 
-    if(number==0){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.E,1);
-      digitalWrite(s.F,1);
 
-    }
-    if(number ==1){
-    digitalWrite(s.B,1); 
-    digitalWrite(s.C,1);
 
-    }
-    if(number==2){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.G,1); 
-      digitalWrite(s.E,1);
-      digitalWrite(s.D,1);
+void display_clear(segment s)
+{
+  for(int i=0;i<=7;i++) digitalWrite(s.pins[1],0); 
+}
 
-    }
-    if(number==3){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.G,1); 
-      digitalWrite(s.C,1);
-      digitalWrite(s.D,1);
+void write_number(int number,segment s)
+{
 
-    }
-    if(number==4){
-      digitalWrite(s.F,1); 
-      digitalWrite(s.G,1);
-      digitalWrite(s.B,1); 
-      digitalWrite(s.C,1);
+    display_clear(s); 
+    byte numbers[]
+    {
+        0B11111100,  //  0
+        0B01100000,  //  1
+        0B11011010,  //  2
+        0B11110010,  //  3
+        0B01100110,  //  4
+        0B10110110,  //  5
+        0B10111110,  //  6
+        0B11100100,  //  7
+        0B11111110,  //  8
+        0B11100110,  //  9
+    };
 
-    }
-    if(number==5){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-    }
-    if(number==6){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-      digitalWrite(s.E,1);
+    for(int i=0; i<8;i++)
+    {
+      int number_bits=numbers[number]>>i & 0x01; // pick each 0 and 1 
 
+      if (s.display_type== 1)number_bits=number_bits ^ 0x01; // If the display is anode, invert the bits 
+      
+      digitalWrite(s.pins[i], number_bits); 
+      
     }
-    if(number==7){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.C,1); 
+
     
 
-    }
-    if(number==8){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-      digitalWrite(s.E,1);
-
-    }
-    if(number==9){
-      digitalWrite(s.A,1); 
-      digitalWrite(s.B,1);
-      digitalWrite(s.F,1);
-      digitalWrite(s.C,1); 
-      digitalWrite(s.D,1);
-      digitalWrite(s.G,1);
-
-    }
-  if(c==1){
-    digitalWrite(s.A,!digitalRead(s.A)); 
-    digitalWrite(s.B,!digitalRead(s.B));
-    digitalWrite(s.C,!digitalRead(s.C)); 
-    digitalWrite(s.D,!digitalRead(s.D));
-    digitalWrite(s.E,!digitalRead(s.E)); 
-    digitalWrite(s.F,!digitalRead(s.F)); 
-    digitalWrite(s.G,!digitalRead(s.G)); 
-    digitalWrite(s.DP,!digitalRead(s.DP));
-
-
-  }
-
-
-
-
-
-
 
 }
+
+
+void test_display(segment s)
+{
+  for(int i=0 ;i<=7 ;i++ )
+  {
+    digitalWrite(s.pins[i],0); 
+  }
+
+  delay(1000); 
+
+  display_clear(s);
+} 
+
