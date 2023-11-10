@@ -28,7 +28,7 @@ for(int i=0;i<=7;i++)
 
 void display_clear(segment s)
 {
-  for(int i=0;i<7;i++) digitalWrite(s.pins[1],0); 
+  for(int i=0;i<=7;i++) digitalWrite(s.pins[1],0); 
 }
 
 void write_number(int number,segment s)
@@ -65,5 +65,15 @@ void write_number(int number,segment s)
 }
 
 
+void test_display(segment s)
+{
+  for(int i=0 ;i<=7 ;i++ )
+  {
+    digitalWrite(s.pins[i],0); 
+  }
 
+  delay(1000); 
+
+  display_clear(s);
+} 
 

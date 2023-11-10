@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#ifndef SEGMENT_H 
+#define SEGMENT_H
 typedef struct  {
   int pins[8];
   int display_type; // 0==Cathode common,1==Anode common 
@@ -30,3 +32,8 @@ paramenters(Number,display)
 void write_number(int number,segment s); 
 
 void write_char(char ch,segment s); 
+
+void test_display(segment s); 
+
+
+#endif// SEGMENT_H
